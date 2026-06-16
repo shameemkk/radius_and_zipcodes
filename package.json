@@ -1,0 +1,29 @@
+{
+  "name": "zip-proximity-api",
+  "version": "1.0.0",
+  "description": "Highly performant zip code proximity (radius) search API over SQLite + SpatiaLite",
+  "main": "index.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "setup": "node setup.js",
+    "import": "node import-data.js",
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "keywords": [
+    "spatialite",
+    "sqlite",
+    "geospatial",
+    "proximity",
+    "radius-search",
+    "zip-code"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "better-sqlite3": "^11.8.1",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
+  }
+}

@@ -1,0 +1,18 @@
+node_modules
+npm-debug.log*
+.env
+.env.*
+.git
+.gitignore
+*.md
+
+# Build the database from the GeoNames source .txt during the build, but keep the
+# generated SQLite files and the obsolete seed dir out of the context (the .db is
+# also locked on Windows + OneDrive — excluding it avoids a context-read error).
+data/*
+!data/*.txt
+seed
+
+Dockerfile
+.dockerignore
+docker-compose.yml

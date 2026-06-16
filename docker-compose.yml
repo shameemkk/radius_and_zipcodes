@@ -1,0 +1,18 @@
+# Run / deploy the API. The database (all 232k zip codes) is built from the
+# committed data/*.txt during `docker build` and BAKED INTO THE IMAGE, so this
+# needs no volumes, no setup, and no import — just bring it up:
+#
+#   docker compose up -d --build      # serve on http://localhost:3000
+#
+# The image is self-contained, so you can also push it to a registry and run it
+# anywhere with a plain `docker run -p 3000:3000 <image>`.
+#
+# To change the data: edit data/*.txt and rebuild (`docker compose build`).
+
+services:
+  api:
+    build: .
+    image: zip-proximity-api
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
