@@ -15,7 +15,7 @@ require('dotenv').config();
 
 const express = require('express');
 const { openDb } = require('./db');
-const { boundingBox, validateParams } = require('./lib');
+const { boundingBox, validateParams, aggregateSgDistricts } = require('./lib');
 
 const PORT = Number(process.env.PORT) || 3000;
 
@@ -25,6 +25,8 @@ const PORT = Number(process.env.PORT) || 3000;
 let db;
 let originStmt;
 let searchStmt;
+let citySearchStmt;
+let sgCitySearchStmt;
 let healthStmt;
 
 try {
@@ -53,6 +55,37 @@ try {
             )
         AND ST_Distance(z.geom, MakePoint(@olon, @olat, 4326), 1) <= @radius_m
       ORDER BY ST_Distance(z.geom, MakePoint(@olon, @olat, 4326), 1) ASC`
+  );
+
+  // City-search for non-SG countries: distinct (city, state) pairs with count.
+  citySearchStmt = db.prepare(
+    `SELECT z.city, z.state, z.country, COUNT(*) AS zip_count
+       FROM zip_codes z
+      WHERE z.country = @country
+        AND z.ROWID IN (
+              SELECT ROWID FROM SpatialIndex
+               WHERE f_table_name = 'zip_codes'
+                 AND search_frame = BuildMbr(@xmin, @ymin, @xmax, @ymax, 4326)
+            )
+        AND ST_Distance(z.geom, MakePoint(@olon, @olat, 4326), 1) <= @radius_m
+      GROUP BY z.city, z.state, z.country
+      ORDER BY z.city ASC`
+  );
+
+  // City-search for SG: group by postal sector (first 2 digits) instead of
+  // street-level city, then JS maps sectors to named districts.
+  sgCitySearchStmt = db.prepare(
+    `SELECT SUBSTR(z.zip_code, 1, 2) AS sector, z.country, COUNT(*) AS zip_count
+       FROM zip_codes z
+      WHERE z.country = 'SG'
+        AND z.ROWID IN (
+              SELECT ROWID FROM SpatialIndex
+               WHERE f_table_name = 'zip_codes'
+                 AND search_frame = BuildMbr(@xmin, @ymin, @xmax, @ymax, 4326)
+            )
+        AND ST_Distance(z.geom, MakePoint(@olon, @olat, 4326), 1) <= @radius_m
+      GROUP BY SUBSTR(z.zip_code, 1, 2), z.country
+      ORDER BY sector ASC`
   );
 } catch (err) {
   console.error('Failed to initialise database:', err.message);
@@ -110,6 +143,44 @@ app.get('/api/v1/proximity-search', (req, res, next) => {
 
     // Already in the exact required shape: { zip_code, city, state, country }.
     return res.json(rows);
+  } catch (err) {
+    return next(err);
+  }
+});
+
+app.get('/api/v1/city-search', (req, res, next) => {
+  const { errors, country, zip, radius } = validateParams(req.query);
+  if (errors.length) {
+    return res.status(400).json({ error: 'invalid_request', details: errors });
+  }
+
+  try {
+    const origin = originStmt.get({ country, zip });
+    if (!origin || origin.lon === null || origin.lat === null) {
+      return res.status(404).json({
+        error: 'origin_not_found',
+        message: `zip_code '${zip}' was not found for country '${country}'`,
+      });
+    }
+
+    const box = boundingBox(origin.lon, origin.lat, radius);
+    const params = {
+      country,
+      xmin: box.xmin,
+      ymin: box.ymin,
+      xmax: box.xmax,
+      ymax: box.ymax,
+      olon: origin.lon,
+      olat: origin.lat,
+      radius_m: radius * 1000,
+    };
+
+    if (country === 'SG') {
+      const rows = sgCitySearchStmt.all(params);
+      return res.json(aggregateSgDistricts(rows));
+    }
+
+    return res.json(citySearchStmt.all(params));
   } catch (err) {
     return next(err);
   }
