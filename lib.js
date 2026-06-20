@@ -173,7 +173,10 @@ function validateParams(query) {
   const errors = [];
 
   const country = asString(query.country).trim().toUpperCase();
-  const zip = asString(query.zip_code).trim();
+  // UK GeoNames data stores outward codes only (e.g. 'SW1A', not 'SW1A 1AA').
+  // Strip the inward code so both 'SW1A' and 'SW1A 1AA' resolve correctly.
+  const zipRaw = asString(query.zip_code).trim();
+  const zip = country === 'UK' ? zipRaw.split(' ')[0].toUpperCase() : zipRaw;
   const radiusRaw = asString(query.radius).trim();
 
   if (!VALID_COUNTRIES.has(country)) {
