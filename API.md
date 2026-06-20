@@ -16,7 +16,7 @@ Returns every postal code within a given radius of an origin postal code,
 
 | Parameter  | Type   | Required | Rules |
 | ---------- | ------ | :------: | ----- |
-| `country`  | string | yes | One of `UK`, `AU`, `MX`, `US`. **Case-insensitive** (`us` = `US`). Any other value → `400`. |
+| `country`  | string | yes | One of `UK`, `AU`, `MX`, `US`, `SG`. **Case-insensitive** (`us` = `US`). Any other value → `400`. |
 | `zip_code` | string | yes | The origin postal code. Matched against stored values (see [Postal-code format](#postal-code-format)). |
 | `radius`   | number | yes | Distance in **kilometres**. Must be a positive, finite number, `0 < radius ≤ 20000`. |
 
@@ -63,7 +63,7 @@ curl "http://localhost:3000/api/v1/proximity-search?country=us&zip_code=10001&ra
 ```jsonc
 // 400 — country=CA, radius=abc
 { "error": "invalid_request",
-  "details": ["country must be one of 'UK', 'AU', 'MX', 'US'",
+  "details": ["country must be one of 'UK', 'AU', 'MX', 'US', 'SG'",
               "radius must be a positive number (kilometres)"] }
 
 // 404 — country=US, zip_code=00000
@@ -142,7 +142,7 @@ The rectangle is a generous superset of the circle (its corners are farther than
 application code** — the database does all of it.
 
 ### 6. Same-country only
-The search is restricted to the **same country** as the origin. UK/AU/MX/US are
+The search is restricted to the **same country** as the origin. UK/AU/MX/US/SG are
 far apart, so this is both correct (you never get a US result for a UK query) and
 faster.
 

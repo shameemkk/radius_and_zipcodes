@@ -25,7 +25,7 @@ by an R-Tree spatial index.
 
 | Param      | Type   | Notes                                                                 |
 | ---------- | ------ | --------------------------------------------------------------------- |
-| `country`  | string | **Required.** One of `UK`, `AU`, `MX`, `US` (case-insensitive). Else `400`. |
+| `country`  | string | **Required.** One of `UK`, `AU`, `MX`, `US`, `SG` (case-insensitive). Else `400`. |
 | `zip_code` | string | **Required.** The origin postal code.                                 |
 | `radius`   | number | **Required.** Distance in **kilometres**; positive, finite.           |
 
@@ -108,7 +108,7 @@ The database is built from `data/*.txt` during the image build, so updating the
 data is just: replace the files and rebuild.
 
 ```powershell
-# 1. Drop updated GeoNames files in ./data (GB.txt, AU.txt, MX.txt, US.txt)
+# 1. Drop updated GeoNames files in ./data (GB.txt, AU.txt, MX.txt, US.txt, SG.txt)
 #    (download fresh archives from https://download.geonames.org/export/zip/)
 
 # 2. Rebuild — the seeder stage re-imports them
@@ -146,9 +146,10 @@ Postal data comes from **GeoNames** (free, CC-BY):
    - `AU.zip` → `AU.txt` (Australia)
    - `MX.zip` → `MX.txt` (Mexico)
    - `US.zip` → `US.txt` (United States)
+   - `SG.zip` → `SG.txt` (Singapore — a city-state, so `state` is blank)
 2. Load:
    ```bash
-   npm run import                          # auto-discovers ./data/{GB,AU,MX,US}.txt
+   npm run import                          # auto-discovers ./data/{GB,AU,MX,US,SG}.txt
    npm run import -- ./data/GB.txt          # or pass explicit paths
    npm run import -- --truncate ./data/GB.txt   # clear table first
    ```

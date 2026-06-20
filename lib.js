@@ -7,7 +7,7 @@
  * database connection.
  */
 
-const VALID_COUNTRIES = new Set(['UK', 'AU', 'MX', 'US']);
+const VALID_COUNTRIES = new Set(['UK', 'AU', 'MX', 'US', 'SG']);
 
 // Pre-formatted for the 400 error message; derived from the set so adding a
 // country in one place keeps the message in sync.

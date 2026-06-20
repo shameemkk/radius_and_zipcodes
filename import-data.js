@@ -8,6 +8,8 @@
  *     GB.zip -> GB.txt   (United Kingdom — GeoNames uses ISO 'GB'; we remap -> 'UK')
  *     AU.zip -> AU.txt   (Australia)
  *     MX.zip -> MX.txt   (Mexico)
+ *     US.zip -> US.txt   (United States)
+ *     SG.zip -> SG.txt   (Singapore)
  *
  * GeoNames postal files are TAB-separated with these columns:
  *   0 country_code   1 postal_code   2 place_name   3 admin_name1 (state/region)
@@ -15,7 +17,7 @@
  *   8 admin_code3    9 latitude     10 longitude   11 accuracy
  *
  * Usage:
- *   npm run import                         # auto-discovers ./data/{GB,AU,MX}.txt
+ *   npm run import                         # auto-discovers ./data/{GB,AU,MX,US,SG}.txt
  *   npm run import -- ./data/GB.txt ./AU.txt
  *   npm run import -- --truncate ./data/GB.txt   # clear table first, then load
  */
@@ -36,7 +38,7 @@ const COUNTRY_REMAP = { GB: 'UK' };
 
 // GeoNames per-country filenames to auto-discover (note: GeoNames uses 'GB', not
 // 'UK', and 'US' for the United States).
-const DEFAULT_FILES = ['GB.txt', 'AU.txt', 'MX.txt', 'US.txt'];
+const DEFAULT_FILES = ['GB.txt', 'AU.txt', 'MX.txt', 'US.txt', 'SG.txt'];
 
 function parseArgs(argv) {
   const files = [];
@@ -122,7 +124,7 @@ async function main() {
     console.error(
       'No input files given and none found in the data directory.\n\n' +
         'Download postal archives from https://download.geonames.org/export/zip/\n' +
-        '(GB.zip, AU.zip, MX.zip), unzip the .txt files into ./data/, then re-run\n' +
+        '(GB.zip, AU.zip, MX.zip, US.zip, SG.zip), unzip the .txt files into ./data/, then re-run\n' +
         '`npm run import`, or pass explicit paths: `npm run import -- ./data/GB.txt`.'
     );
     process.exit(1);
